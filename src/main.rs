@@ -1,7 +1,8 @@
 use std::fmt::{Display, Formatter, write};
 use crate::Pulse::{Long, Short};
 
-#[derive(Debug,PartialEq)]
+//CHALLENGE 5
+#[derive(Debug, PartialEq)]
 enum Pulse {
     Short,
     Long,
@@ -44,6 +45,71 @@ impl std::fmt::Display for Pulse {
     }
 }
 
+//CHALLENGE 6
+enum Card {
+    Ace,
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Jack,
+    Queen,
+    King,
+}
+
+struct Hand {
+    cards: Vec<Card>,
+}
+
+impl Hand {
+    fn new() -> Self {
+        Hand {
+            cards: vec![],
+        }
+    }
+
+    fn add(&mut self, card: Card) {
+        self.cards.push(card);
+    }
+    fn value(&self) -> usize {
+        let mut result: usize = 0;
+        let mut aces_seen = 0;
+        for c in &self.cards {
+            use Card::*;
+            result += match c {
+                King | Queen | Jack => 10,
+                //Here we can define an operation inside the match, just need to add it into brackets.
+                //Remember to return a value anyway.
+                Ace => {
+                    aces_seen += 1;
+                    0
+                }
+                One => 1,
+                Two => 2,
+                Three => 3,
+                Four => 4,
+                Five => 5,
+                Six => 6,
+                Seven => 7,
+                Eight => 8,
+                Nine => 9,
+            }
+        }
+
+        for _ in 0..aces_seen {
+            let ace_value = if result <= 10 { 11 } else { 1 };
+            result += ace_value;
+        }
+        result
+    }
+}
+
+
 fn main() {
     let list = vec![1.5, 3.0, 5.0, 8.8];
     assert_eq!(median(list), Some(5.5));
@@ -63,9 +129,14 @@ fn main() {
     sort_username(&mut users);//User &mut as will pass a reference toward the mut vector
     assert_eq!(users, vec!["amy", "Tood"]);
 
-    let actual_code= "ab".to_string().to_morse_code();
-    let expected = vec![vec![Short,Long],vec![Short,Long,Short,Long]];
-    assert_eq!(actual_code,expected);
+    let actual_code = "ab".to_string().to_morse_code();
+    let expected = vec![vec![Short, Long], vec![Short, Long, Short, Long]];
+    assert_eq!(actual_code, expected);
+
+    let mut hand_cards = Hand::new();
+    hand_cards.add(Card::King);
+    hand_cards.add(Card::Ace);
+    println!("Hand is {}", hand_cards.value())
 }
 
 //CHALLENGE 1
