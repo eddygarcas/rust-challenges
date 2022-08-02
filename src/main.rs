@@ -1,7 +1,17 @@
+extern crate num;
+
 use std::fmt::{Display, Formatter, write};
+use std::iter::Sum;
+use std::ops::Add;
+use chrono::{Date, Local, TimeZone};
 use crate::Pulse::{Long, Short};
+use crate::Scale::{Celsius, Fahrenheit};
+
+
+/////////////////////////////////////////////////
 
 //CHALLENGE 5
+#[derive(Debug, PartialEq)]
 #[derive(Debug, PartialEq)]
 enum Pulse {
     Short,
@@ -110,6 +120,56 @@ impl Hand {
 }
 
 
+/////////////////////////////////////////////////
+
+struct ImportantEvent {
+    name: String,
+    birthday: Date<Local>,
+}
+
+trait Deadline {
+    fn is_passed(&self) -> bool;
+}
+
+impl Deadline for ImportantEvent {
+    fn is_passed(&self) -> bool {
+        self.birthday < Local::today()
+    }
+}
+
+/////////////////////////////////////////////////
+
+enum Scale {
+    Celsius,
+    Fahrenheit,
+}
+
+struct Temperature {
+    degrees: f32,
+    scale: Scale,
+}
+
+trait ConvertTemperature {
+    fn to_celsius(&self) -> f32;
+    fn to_fahrenheit(&self) -> f32;
+}
+
+impl ConvertTemperature for Temperature {
+    fn to_celsius(&self) -> f32 {
+        match self.scale {
+            Fahrenheit => (self.degrees - 32 as f32) * (5 / 9) as f32,
+            _ => self.degrees
+        }
+    }
+
+    fn to_fahrenheit(&self) -> f32 {
+        match self.scale {
+            Celsius => (self.degrees * (9 / 5) as f32) + 32 as f32,
+            _ => self.degrees
+        }
+    }
+}
+
 fn main() {
     let list = vec![1.5, 3.0, 5.0, 8.8];
     assert_eq!(median(list), Some(5.5));
@@ -137,6 +197,30 @@ fn main() {
     hand_cards.add(Card::King);
     hand_cards.add(Card::Ace);
     println!("Hand is {}", hand_cards.value())
+    //CHALLENGE 5
+    let actual_code = "ab".to_string().to_morse_code();
+    let expected = vec![vec![Short, Long], vec![Short, Long, Short, Long]];
+    assert_eq!(actual_code, expected);
+
+    //CHALLENGE 6 check dates
+    let xmas = ImportantEvent {
+        name: String::from("Eduard"),
+        birthday: Local.ymd(2014, 7, 8),
+    };
+    println!("Has {} passed its date {}", xmas.name, xmas.is_passed());
+
+    //CHALLENGE 8 convert celsius and fahrenheit
+    let current_temperature = Temperature {
+        degrees: 0f32,
+        scale: Celsius,
+    };
+    println!("Temperature in celsius {}", current_temperature.to_celsius());
+    println!("Temperature in  fahrenheit {}", current_temperature.to_fahrenheit());
+
+    //CHALLENGE 9
+    let mut cadena = vec![Some(2), None, Some(3)];
+    let result_missing_data = sum_missing_data(&mut cadena);
+    println!("Result of missing data {:?}", result_missing_data);
 }
 
 //CHALLENGE 1
@@ -191,6 +275,14 @@ fn sort_username<T: AsRef<str> + Ord>(users: &mut Vec<T>) {
     // This will take an element iterating and apply a method temporarily just for the sort operation
     //which means it won't alter the value in the final sort.
     users.sort_by_cached_key(|x| x.as_ref().to_lowercase());
+}
+
+//CHALLENGE 9
+//fn sum_missing_data<T: num::PrimInt + Sum>(data: &mut Vec<Option<T>>) -> T {
+fn sum_missing_data(data: &mut Vec<Option<i32>>) -> i32 {
+    //Functional programming, will iterate through Vec mapping every element, with either the
+    //integer value or 0 and lastly will sum the whole array of i32
+    data.iter().map(|x| x.unwrap_or(0)).sum()
 }
 
 
