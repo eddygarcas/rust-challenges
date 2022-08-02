@@ -1,9 +1,10 @@
 extern crate num;
 
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter, write};
 use std::iter::Sum;
 use std::ops::Add;
-use chrono::{Date, Local, TimeZone};
+use chrono::{Date, Local, TimeZone, DateTime, NaiveDate};
 use crate::Pulse::{Long, Short};
 use crate::Scale::{Celsius, Fahrenheit};
 
@@ -11,7 +12,6 @@ use crate::Scale::{Celsius, Fahrenheit};
 /////////////////////////////////////////////////
 
 //CHALLENGE 5
-#[derive(Debug, PartialEq)]
 #[derive(Debug, PartialEq)]
 enum Pulse {
     Short,
@@ -196,7 +196,7 @@ fn main() {
     let mut hand_cards = Hand::new();
     hand_cards.add(Card::King);
     hand_cards.add(Card::Ace);
-    println!("Hand is {}", hand_cards.value())
+    println!("Hand is {}", hand_cards.value());
     //CHALLENGE 5
     let actual_code = "ab".to_string().to_morse_code();
     let expected = vec![vec![Short, Long], vec![Short, Long, Short, Long]];
@@ -221,6 +221,10 @@ fn main() {
     let mut cadena = vec![Some(2), None, Some(3)];
     let result_missing_data = sum_missing_data(&mut cadena);
     println!("Result of missing data {:?}", result_missing_data);
+
+    //CHALLENGE 10
+    let resul_between_date = weeks_between("2020-09-13", "1976-09-13");
+    println!("Weeks between {:?}", resul_between_date);
 }
 
 //CHALLENGE 1
@@ -285,6 +289,11 @@ fn sum_missing_data(data: &mut Vec<Option<i32>>) -> i32 {
     data.iter().map(|x| x.unwrap_or(0)).sum()
 }
 
+//CHALLENGE 10
+fn weeks_between(a: &str, b: &str) -> i32 {
+    let diff = NaiveDate::parse_from_str(a, "%Y-%m-%d").unwrap() - NaiveDate::parse_from_str(b, "%Y-%m-%d").unwrap();
+    diff.num_days() as i32 / 7
+}
 
 #[test]
 fn empty_list() {
