@@ -7,6 +7,7 @@ use std::ops::Add;
 use chrono::{Date, Local, TimeZone, DateTime, NaiveDate};
 use crate::Pulse::{Long, Short};
 use crate::Scale::{Celsius, Fahrenheit};
+use std::str::FromStr;
 
 
 /////////////////////////////////////////////////
@@ -170,6 +171,51 @@ impl ConvertTemperature for Temperature {
     }
 }
 
+//CHALLENGE 11 ******************************************************************
+struct Isbn {
+    raw: String,
+    digits: Vec<u8>,
+}
+
+enum InvalidIsbn {
+    TooLong,
+    TooShort,
+    FailedCheck,
+    InvalidCharacter(usize, char),
+}
+
+impl FromStr for Isbn {
+    type Err = InvalidIsbn;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        todo!()
+    }
+}
+
+impl std::fmt::Display for Isbn {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.raw)
+    }
+}
+
+fn calculate_check_digit(digits: &[u8]) -> u8 {
+    const WEIGHTS: [u8; 12] = [1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3];
+    let weight_applied: u32 = digits
+        .iter()
+        .zip(WEIGHTS.iter())
+        .map(|(&x, &y)| x * y)
+        .map(|subtotal| subtotal as u32)
+        .sum();
+
+    let check_digit = 10 - (weight_applied % 10);
+
+    match check_digit {
+        10 => 0u8,
+        x => x as u8
+    }
+}
+
+
 fn main() {
     let list = vec![1.5, 3.0, 5.0, 8.8];
     assert_eq!(median(list), Some(5.5));
@@ -225,6 +271,11 @@ fn main() {
     //CHALLENGE 10
     let resul_between_date = weeks_between("2020-09-13", "1976-09-13");
     println!("Weeks between {:?}", resul_between_date);
+
+    //CHALLENGE 11
+    let isbn = [9u8, 7, 8, 3, 1, 6, 1, 4, 8, 4, 1, 0, 0];
+    let digit = calculate_check_digit(&isbn);
+    println!("Check digit {}", digit);
 }
 
 //CHALLENGE 1
