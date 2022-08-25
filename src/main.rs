@@ -177,6 +177,7 @@ struct Isbn {
     digits: Vec<u8>,
 }
 
+// Enum are great for errors as there are not ambiguous.
 enum InvalidIsbn {
     TooLong,
     TooShort,
@@ -188,7 +189,32 @@ impl FromStr for Isbn {
     type Err = InvalidIsbn;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!()
+        let mut digits = Vec::with_capacity(13);
+        for (i, c) in s.char_indices() {
+            match c {
+                '-' => continue,
+                '0'..='9' => digits.push(c.to_digit(10).unwrap() as u8),
+                _ => {
+                    return Err(InvalidIsbn::InvalidCharacter(i, c));
+                }
+            }
+        }
+
+        let n_digits = digits.len();
+        if n_digits > 13 {
+            return Err(InvalidIsbn::TooLong);
+        } else if n_digits < 13 {
+            return Err(InvalidIsbn::TooShort);
+        }
+
+        if digits[12] != calculate_check_digit(&digits) {
+            return Err(InvalidIsbn::FailedCheck);
+        }
+
+        Ok(Isbn {
+            raw: String::from(s),
+            digits,
+        })
     }
 }
 
@@ -272,10 +298,6 @@ fn main() {
     let resul_between_date = weeks_between("2020-09-13", "1976-09-13");
     println!("Weeks between {:?}", resul_between_date);
 
-    //CHALLENGE 11
-    let isbn = [9u8, 7, 8, 3, 1, 6, 1, 4, 8, 4, 1, 0, 0];
-    let digit = calculate_check_digit(&isbn);
-    println!("Check digit {}", digit);
 }
 
 //CHALLENGE 1
@@ -384,4 +406,18 @@ fn unique_even_list() {
     let expected_output = vec![1, 2, 5, 7, 9];
     let actual_output = unique(input);
     assert_eq!(actual_output, expected_output);
+}
+
+#[test]
+fn can_correctly_calculate_check_digits() {
+    let cases = [
+        ([9_u8, 7, 8, 1, 8, 6, 1, 9, 7, 8, 7, 6], 9_u8),
+        ([9_u8, 7, 8, 3, 1, 6, 1, 4, 8, 4, 1, 0], 0_u8),
+    ];
+
+    for (case, check) in cases.iter() {
+        let actual = calculate_check_digit(case);
+        println!("{:?} -> {}?  {}", &case, check, actual);
+        assert_eq!(calculate_check_digit(case), *check)
+    }
 }
